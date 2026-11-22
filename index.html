@@ -109,7 +109,7 @@ const initials = t => esc(String(t || "?").split(/\s+/).slice(0, 2).map(w => w[0
 function leadHtml(g) {
   const clip = media(g.clip), img = media(g.img) || media(g.cap);
   const m = clip
-    ? `<video src="${clip}" ${img ? `poster="${img}"` : ""} autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>`
+    ? `<video src="${clip}" ${img ? `poster="${img}"` : ""} muted loop playsinline preload="none" aria-hidden="true"></video>`
     : img ? `<img src="${img}" alt="">` : `<div class="ph">${initials(g.t)}</div>`;
   return `<a class="lead" href="${esc(site(g.u))}" target="_blank" rel="noopener">
     <div class="media">${m}</div>
@@ -131,6 +131,19 @@ function cardHtml(g) {
   </a>`;
 }
 
+// Toca só os trailers que estão na tela, para não carregar dezenas de vídeos de uma vez.
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const io = "IntersectionObserver" in window ? new IntersectionObserver(entries => {
+  for (const e of entries) {
+    const v = e.target;
+    if (e.isIntersecting) { v.play().catch(() => {}); } else { v.pause(); }
+  }
+}, { threshold: 0.35 }) : null;
+function watchVideos() {
+  if (reduceMotion) return;
+  document.querySelectorAll(".lead video").forEach(v => { v.muted = true; io ? io.observe(v) : v.play().catch(() => {}); });
+}
+
 function render() {
   const feed = document.getElementById("feed");
   if (!ITEMS.length) { feed.innerHTML = `<p class="empty">Nenhum jogo ainda. A lista é atualizada todo dia.</p>`; return; }
@@ -140,8 +153,6 @@ function render() {
   let html = "";
   for (const games of days.values()) {
     const d = new Date(games[0].d);
-    const leadIdx = Math.max(0, games.findIndex(g => media(g.clip)));
-    const lead = games[leadIdx], rest = games.filter((_, i) => i !== leadIdx);
     html += `<section class="day">
       <div class="date">
         <span class="num">${fNum.format(d)}</span>
@@ -149,13 +160,13 @@ function render() {
         <span class="sub">${fWeek.format(d).replace("-feira", "")} · ${games.length} ${games.length === 1 ? "jogo" : "jogos"}</span>
       </div>
       <div class="games">
-        ${leadHtml(lead)}
-        ${rest.length ? `<div class="rest">${rest.map(cardHtml).join("")}</div>` : ""}
+        ${games.map(leadHtml).join("")}
       </div>
     </section>`;
   }
   if (ITEMS.length > list.length) html += `<button class="more" id="more" type="button">Mostrar dias anteriores</button>`;
   feed.innerHTML = html;
+  watchVideos();
   const more = document.getElementById("more");
   if (more) more.addEventListener("click", () => { shown += PAGE; render(); });
 }
