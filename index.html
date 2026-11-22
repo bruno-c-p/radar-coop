@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Radar Co-op</title>
+<meta name="description" content="Novidades para jogar em grupo, atualizadas todo dia.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 18L12 5l9 13z' fill='%23ff3b45'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #160a0d; --panel: #22111a; --field: #24121a; --line: #33202a;
+  --fg: #f6ecee; --soft: #d9c3c8; --muted: #a88a91;
+  --accent: #ff3b45; --accent-soft: #ff8a8e; --chip: #3a1820;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(clamp(16px, 3vw, 48px), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(16px, 3vw, 48px), env(safe-area-inset-right, 0px));
+}
+img { max-width: 100%; }
+a { color: var(--accent-soft); }
+.wrap { width: 100%; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 40px; }
+header { display: flex; align-items: center; gap: 16px 24px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 800; font-size: 22px; }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(36px, 6vw, 56px); line-height: 1; letter-spacing: -.02em; text-wrap: balance; }
+#feed { display: flex; flex-direction: column; gap: 40px; }
+.day { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 32px; padding-top: 28px; border-top: 1px solid var(--line); }
+.date { display: flex; flex-direction: column; gap: 2px; }
+.date .num { font-family: var(--f-display); font-weight: 800; font-size: 64px; line-height: .9; color: var(--accent); font-variant-numeric: tabular-nums; }
+.date .month { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+.date .sub { font-size: 13px; color: var(--muted); }
+.games { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.lead { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); border-radius: 20px; overflow: hidden; background: var(--panel); text-decoration: none; color: var(--fg); }
+.lead .media { aspect-ratio: 16 / 9; background: #000; }
+.lead video, .lead img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lead .body { padding: 26px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; min-width: 0; }
+.lead .title { font-family: var(--f-display); font-weight: 800; font-size: 30px; line-height: 1.05; overflow-wrap: anywhere; }
+.lead .desc { font-size: 14px; color: var(--soft); }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--chip); color: var(--accent-soft); }
+.tag.upd { background: var(--accent); color: #fff; font-weight: 600; }
+.rest { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; background: var(--panel); text-decoration: none; color: var(--fg); }
+.card .thumb { aspect-ratio: 616 / 353; background: var(--field); }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card .body { padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.card .title { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.card .meta { font-size: 12px; color: var(--muted); }
+.card .meta .tag { font-size: 11px; padding: 2px 8px; margin-right: 4px; }
+.ph { width: 100%; height: 100%; display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 28px; color: var(--line); }
+.lead:hover .title, .card:hover .title { color: var(--accent-soft); }
+.lead:focus-visible, .card:focus-visible, .more:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+.more { align-self: center; font: 600 14px var(--f-body); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 12px 22px; cursor: pointer; }
+.more:hover { border-color: var(--accent); }
+.empty { color: var(--muted); padding: 32px 0; border-top: 1px solid var(--line); }
+footer { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 900px) {
+  .day { grid-template-columns: 1fr; gap: 16px; }
+  .date { flex-direction: row; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .date .num { font-size: 44px; }
+  .lead { grid-template-columns: 1fr; }
+  .rest { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) { .rest { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .lead video { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18L12 5l9 13z" fill="#ff3b45"></path></svg>
+      Radar Co-op
+    </div>
+  </header>
+
+  <h1>Novidades para jogar em grupo</h1>
+
+  <main id="feed"><p class="empty">Carregando jogos…</p></main>
+
+  <footer>Página não oficial, sem vínculo com online-fix.me. Imagens, descrições e trechos de trailer vêm da página de cada jogo na Steam. Clique num jogo para abrir a página original, em russo.</footer>
+</div>
+
+<script>
+const PAGE = 30;
+const TZ = "America/Sao_Paulo";
+const fDay = new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" });
+const fNum = new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, day: "numeric" });
+const fMonth = new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, month: "long" });
+const fWeek = new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, weekday: "long" });
+
+let ITEMS = [];
+let shown = PAGE;
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const site = u => /^https:\/\/online-fix\.me\//.test(u || "") ? u : "https://online-fix.me/";
+const media = u => /^media\/[\w.-]+$/.test(u || "") ? u : "";
+const modes = g => [g.coop && "Co-op", g.mp && "Multiplayer"].filter(Boolean).join(" + ") || "Online";
+const initials = t => esc(String(t || "?").split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase());
+
+function leadHtml(g) {
+  const clip = media(g.clip), img = media(g.img) || media(g.cap);
+  const m = clip
+    ? `<video src="${clip}" ${img ? `poster="${img}"` : ""} autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>`
+    : img ? `<img src="${img}" alt="">` : `<div class="ph">${initials(g.t)}</div>`;
+  return `<a class="lead" href="${esc(site(g.u))}" target="_blank" rel="noopener">
+    <div class="media">${m}</div>
+    <div class="body">
+      <span class="title">${esc(g.t)}</span>
+      ${g.desc ? `<span class="desc">${esc(g.desc)}</span>` : ""}
+      <div class="tags">${g.upd ? `<span class="tag upd">Atualizado</span>` : ""}<span class="tag">${modes(g)}</span>${g.cat ? `<span class="tag">${esc(g.cat)}</span>` : ""}</div>
+    </div>
+  </a>`;
+}
+function cardHtml(g) {
+  const img = media(g.cap) || media(g.img);
+  return `<a class="card" href="${esc(site(g.u))}" target="_blank" rel="noopener">
+    <div class="thumb">${img ? `<img src="${img}" alt="" loading="lazy">` : `<div class="ph">${initials(g.t)}</div>`}</div>
+    <div class="body">
+      <span class="title">${esc(g.t)}</span>
+      <span class="meta">${g.upd ? `<span class="tag upd">Atualizado</span> ` : ""}${modes(g)}</span>
+    </div>
+  </a>`;
+}
+
+function render() {
+  const feed = document.getElementById("feed");
+  if (!ITEMS.length) { feed.innerHTML = `<p class="empty">Nenhum jogo ainda. A lista é atualizada todo dia.</p>`; return; }
+  const list = ITEMS.slice(0, shown);
+  const days = new Map();
+  list.forEach(g => { const k = fDay.format(new Date(g.d)); if (!days.has(k)) days.set(k, []); days.get(k).push(g); });
+  let html = "";
+  for (const games of days.values()) {
+    const d = new Date(games[0].d);
+    const leadIdx = Math.max(0, games.findIndex(g => media(g.clip)));
+    const lead = games[leadIdx], rest = games.filter((_, i) => i !== leadIdx);
+    html += `<section class="day">
+      <div class="date">
+        <span class="num">${fNum.format(d)}</span>
+        <span class="month">${fMonth.format(d)}</span>
+        <span class="sub">${fWeek.format(d).replace("-feira", "")} · ${games.length} ${games.length === 1 ? "jogo" : "jogos"}</span>
+      </div>
+      <div class="games">
+        ${leadHtml(lead)}
+        ${rest.length ? `<div class="rest">${rest.map(cardHtml).join("")}</div>` : ""}
+      </div>
+    </section>`;
+  }
+  if (ITEMS.length > list.length) html += `<button class="more" id="more" type="button">Mostrar dias anteriores</button>`;
+  feed.innerHTML = html;
+  const more = document.getElementById("more");
+  if (more) more.addEventListener("click", () => { shown += PAGE; render(); });
+}
+
+fetch("games.json", { cache: "no-cache" })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => {
+    ITEMS = (Array.isArray(data) ? data : []).filter(g => g && g.t && g.d && !isNaN(new Date(g.d)))
+      .sort((a, b) => new Date(b.d) - new Date(a.d));
+    render();
+  })
+  .catch(() => { document.getElementById("feed").innerHTML = `<p class="empty">Não foi possível carregar a lista agora. Tente recarregar a página em alguns minutos.</p>`; });
+</script>
+</body>
+</html>
