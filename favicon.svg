@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<style>.p{fill:#160a0d}@media (prefers-color-scheme: dark){.p{fill:#ffffff}}</style>
+<circle cx="32" cy="32" r="26" fill="none" stroke="#ff3b45" stroke-width="8"/>
+<path d="M32 32 L32 6 A26 26 0 0 1 54.5 19 Z" fill="#ff3b45" opacity=".6"/>
+<circle class="p" cx="23" cy="38" r="8"/>
+<circle class="p" cx="41" cy="42" r="8"/>
+</svg>
