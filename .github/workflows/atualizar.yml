@@ -1,0 +1,56 @@
+name: Atualizar Radar Co-op
+
+on:
+  schedule:
+    - cron: "9 12 * * *"   # 09:09 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: atualizar
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ler o feed RSS
+        shell: powershell
+        run: ./scripts/sync-feed.ps1 -OutDir "$env:RUNNER_TEMP\sync"
+
+      - name: Baixar mídia da Steam dos jogos novos
+        shell: powershell
+        run: |
+          $out = ./scripts/merge-games.ps1 -SyncDir "$env:RUNNER_TEMP\sync" -Site "$env:GITHUB_WORKSPACE"
+          $out
+          $new = (($out | Where-Object { $_ -like 'NEW:*' }) -replace '^NEW:\s*', '').Split(',', [StringSplitOptions]::RemoveEmptyEntries)
+          foreach ($id in $new) {
+            $t = (Get-Content "$env:RUNNER_TEMP\sync\$id.json" -Raw -Encoding UTF8 | ConvertFrom-Json).t
+            try { ./scripts/fetch-media.ps1 -Name $t -Id $id -OutDir "$env:RUNNER_TEMP\media" }
+            catch { Write-Host "Sem mídia para $id ($t): $_" }
+          }
+
+      - name: Atualizar games.json
+        shell: powershell
+        run: ./scripts/merge-games.ps1 -SyncDir "$env:RUNNER_TEMP\sync" -Site "$env:GITHUB_WORKSPACE" -MediaDir "$env:RUNNER_TEMP\media" -Apply
+
+      - name: Publicar
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add games.json media
+          if git diff --cached --quiet; then
+            echo "Nada novo no feed."
+            exit 0
+          fi
+          git commit -m "Atualização $(date -u +%F)"
+          git push
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" || true
